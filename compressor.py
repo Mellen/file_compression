@@ -1,4 +1,6 @@
 import pickle
+import sys
+import os
 
 class Compressor():
     def __init__(self, filename):
@@ -11,10 +13,19 @@ class Compressor():
         
         uniques = {t:i for (i, t) in enumerate(set(text))}
         data = self.text_to_data(text, uniques)
-        compressed = CompressedStructure(self.filename, uniques, len(uniques).bit_length(), data)
         
         with open(self.outputname, 'wb') as compressed_file:
-            pickle.dump(compressed, compressed_file)
+            filename_bytes = os.path.basename(self.filename).encode('utf-8')
+            compressed_file.write((len(filename_bytes)).to_bytes(4, sys.byteorder))
+            compressed_file.write(filename_bytes)
+            unique_pickle = pickle.dumps(uniques)
+            compressed_file.write((len(unique_pickle)).to_bytes(4, sys.byteorder))
+            compressed_file.write(unique_pickle)
+            bit_length = len(uniques).bit_length()
+            compressed_file.write(bit_length.to_bytes(4, sys.byteorder))
+            compressed_file.write((len(data)).to_bytes(4, sys.byteorder))
+            for datum in data:
+                compressed_file.write(datum.to_bytes(8, sys.byteorder))
 
     def text_to_data(self, text, uniques):
         bl = len(uniques).bit_length()
@@ -25,7 +36,6 @@ class Compressor():
         for c in text:
             n = uniques[c]
             b = (bin(n)[2:]).zfill(bl)
-            print(n, b)
             value += b
             current_insert += 1
             if current_insert == max_inserts:
@@ -33,14 +43,7 @@ class Compressor():
                 current_insert = 0
                 value = ''
 
-        if current_insert < max_inserts:
+        if current_insert < max_inserts and current_insert > 0:
             values.append(int(value, 2))
 
         return values
-
-class CompressedStructure():
-    def __init__(self, filename, uniques, bit_length, data):
-        self.filename = filename
-        self.uniques = uniques
-        self.bit_length = bit_length
-        self.data = data
