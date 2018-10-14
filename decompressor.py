@@ -9,17 +9,18 @@ class Decompressor():
         with open(self.filename, 'rb') as compressed_file:
             filename_length = int.from_bytes(compressed_file.read(4), sys.byteorder)
             filename = compressed_file.read(filename_length).decode('utf-8')
-            fl = int.from_bytes(compressed_file.read(4), sys.byteorder)
-            frequencies = pickle.loads(compressed_file.read(fl))
+            sbl = int.from_bytes(compressed_file.read(4), sys.byteorder)
+            print(sbl)
+            sorted_chars = compressed_file.read(sbl).decode('utf-8')
+            frequencies = {'0'*i:c for i, c in enumerate(sorted_chars)}
             print(frequencies)
             dl = int.from_bytes(compressed_file.read(16), sys.byteorder)
             data = int.from_bytes(compressed_file.read(dl), sys.byteorder)
 
         with open(filename, 'w') as textfile:
             output = ''
-            reverse_lookup = {frequencies[key]:key for key in frequencies}
             full_binary = bin(data)[3:].split('1')
             for n in full_binary:
-                output += reverse_lookup[n]
+                output += frequencies[n]
             textfile.write(output)
                 

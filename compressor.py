@@ -21,6 +21,7 @@ class Compressor():
         freq_list = sorted([(k,frequencies[k]) for k in frequencies], key=lambda f: f[1])
 
         frequencies = {f[0]:'0'*i for i, f in enumerate(freq_list)}
+        sorted_chars = ''.join([f[0] for f in freq_list])
 
         data = self.text_to_data(text, frequencies)
         data_byte_count = (data.bit_length() // 8) + 1;
@@ -29,9 +30,9 @@ class Compressor():
             filename_bytes = os.path.basename(self.filename).encode('utf-8')
             compressed_file.write((len(filename_bytes)).to_bytes(4, sys.byteorder))
             compressed_file.write(filename_bytes)
-            freq_pickle = pickle.dumps(frequencies)
-            compressed_file.write((len(freq_pickle)).to_bytes(4, sys.byteorder))
-            compressed_file.write(freq_pickle)
+            sorted_bytes = sorted_chars.encode('utf-8')
+            compressed_file.write((len(sorted_bytes)).to_bytes(4, sys.byteorder))
+            compressed_file.write(sorted_bytes)
             compressed_file.write(data_byte_count.to_bytes(16, sys.byteorder))
             compressed_file.write(data.to_bytes(data_byte_count, sys.byteorder))
 
