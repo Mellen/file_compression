@@ -1,4 +1,3 @@
-import pickle
 import sys
 import os
 
@@ -10,17 +9,26 @@ class Compressor():
     def compress(self):
         with open(self.filename, 'r') as textfile:
             text = textfile.read()
-        
-        uniques = {t:i for (i, t) in enumerate(set(text))}
+
+        uniques = {}
+        chars = []
+        count = 1
+        for c in text:
+            if c not in uniques:
+                uniques[c] = count
+                count += 1
+                chars.append(c)
+
+        chars = ''.join(chars)
         data = self.text_to_data(text, uniques)
         
         with open(self.outputname, 'wb') as compressed_file:
             filename_bytes = os.path.basename(self.filename).encode('utf-8')
             compressed_file.write((len(filename_bytes)).to_bytes(4, sys.byteorder))
             compressed_file.write(filename_bytes)
-            unique_pickle = pickle.dumps(uniques)
-            compressed_file.write((len(unique_pickle)).to_bytes(4, sys.byteorder))
-            compressed_file.write(unique_pickle)
+            char_bytes = chars.encode('utf-8')
+            compressed_file.write((len(char_bytes)).to_bytes(4, sys.byteorder))
+            compressed_file.write(char_bytes)
             bit_length = len(uniques).bit_length()
             compressed_file.write(bit_length.to_bytes(4, sys.byteorder))
             compressed_file.write((len(data)).to_bytes(4, sys.byteorder))
