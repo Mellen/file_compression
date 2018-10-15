@@ -12,8 +12,6 @@ class Decompressor():
             output = ''
             expected_length = (64 // bit_length)*bit_length
             for value in data:
-                if value == data[-1]:
-                    print(value, bin(value)[2:])
                 b = bin(value)[2:]
                 b = b.zfill(expected_length)
                 while len(b) >= bit_length:

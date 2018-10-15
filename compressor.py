@@ -10,17 +10,9 @@ class Compressor():
         with open(self.filename, 'r') as textfile:
             text = textfile.read()
 
-        uniques = {}
-        chars = []
-        count = 1
-        for c in text:
-            if c not in uniques:
-                uniques[c] = count
-                count += 1
-                chars.append(c)
+        chars = ''.join(set(text))
 
-        chars = ''.join(chars)
-        data = self.text_to_data(text, uniques)
+        data = self.text_to_data(text, chars)
         
         with open(self.outputname, 'wb') as compressed_file:
             filename_bytes = os.path.basename(self.filename).encode('utf-8')
@@ -29,20 +21,20 @@ class Compressor():
             char_bytes = chars.encode('utf-8')
             compressed_file.write((len(char_bytes)).to_bytes(4, sys.byteorder))
             compressed_file.write(char_bytes)
-            bit_length = len(uniques).bit_length()
+            bit_length = len(chars).bit_length()
             compressed_file.write(bit_length.to_bytes(4, sys.byteorder))
             compressed_file.write((len(data)).to_bytes(4, sys.byteorder))
             for datum in data:
                 compressed_file.write(datum.to_bytes(8, sys.byteorder))
 
-    def text_to_data(self, text, uniques):
-        bl = len(uniques).bit_length()
+    def text_to_data(self, text, chars):
+        bl = len(chars).bit_length()
         max_inserts = 64//bl;
         current_insert = 0
         value = ''
         values = []
         for c in text:
-            n = uniques[c]
+            n = chars.index(c) + 1
             b = (bin(n)[2:]).zfill(bl)
             value += b
             current_insert += 1
