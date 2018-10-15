@@ -1,4 +1,4 @@
-#File Compression
+# File Compression
 
 A exploratory look at how to compress files.
 
