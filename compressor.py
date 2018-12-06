@@ -1,6 +1,7 @@
 import sys
 import os
-from binarytree import Leaf, Node, printTree, LEFT, RIGHT
+from math import ceil
+from binarytree import buildTree
 
 class TextCompressor():
     def __init__(self, filename):
@@ -64,21 +65,9 @@ class BinaryCompressor():
         print('start length', len(all_bytes))
 
         bytes_frequency = self.getFrequencies(all_bytes)
-        
-        tree = [Leaf(bf, bf[1]) for bf in bytes_frequency]
-        leaves = []
-        
-        while len(tree) > 1:
-            left, right = tree[:2]
-            if type(left) is Leaf:
-                leaves.append(left)
-            if type(right) is Leaf:
-                leaves.append(right)
-            tree = tree[2:]
-            node = Node(left, right, left.value + right.value)
-            tree.append(node)
-            tree = sorted(tree, key=lambda node: node.value)
-            
+
+        leaves, _ = buildTree(bytes_frequency)
+
         symbol_map = {leaf.data[0]:leaf.code for leaf in leaves}
 
         output_bits = '1'
@@ -91,8 +80,19 @@ class BinaryCompressor():
 
         output_bytes = output_int.to_bytes(byte_count, sys.byteorder)
 
-        print(symbol_map)
-        print('end length', len(output_bytes))        
+        max_count_bytes = ceil(leaves[-1].data[1].bit_length()/8)
+
+        header_bytes = max_count_bytes.to_bytes(8, sys.byteorder)
+
+        for leaf in leaves:
+            header_bytes += (leaf.data[0].to_bytes(1, sys.byteorder))
+            header_bytes += leaf.data[1].to_bytes(max_count_bytes, sys.byteorder)
+
+        with open(self.outputname, 'wb') as out_file:
+            out_file.write(header_bytes)
+            out_file.write(output_bytes)
+
+        print('end length', len(output_bytes) + len(header_bytes))
 
     def getFrequencies(self, all_bytes):
         byte_set = set(all_bytes)
@@ -101,7 +101,7 @@ class BinaryCompressor():
 
         for b in all_bytes:
             bytes_frequency_dict[b] = bytes_frequency_dict[b] + 1
-        
+
         return sorted([item for item in bytes_frequency_dict.items()], key=lambda item:item[1])
 
         

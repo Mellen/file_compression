@@ -39,6 +39,25 @@ class Node():
         self.right.update_code(update)
 
 
+def buildTree(bytes_frequency):
+    tree = [Leaf(bf, bf[1]) for bf in bytes_frequency]
+
+    leaves = []
+
+    while len(tree) > 1:
+        left, right = tree[:2]
+        if type(left) is Leaf:
+            leaves.append(left)
+        if type(right) is Leaf:
+            leaves.append(right)
+        tree = tree[2:]
+        node = Node(left, right, left.value + right.value)
+        tree.append(node)
+        tree = sorted(tree, key=lambda node: node.value)
+
+    return leaves, tree
+
+
 def printTree(root):
     layers = [[root]]
     done = False
