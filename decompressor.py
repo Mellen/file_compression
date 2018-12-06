@@ -1,6 +1,6 @@
 import sys
 
-class Decompressor():
+class TextDecompressor():
     def __init__(self, filename):
         self.filename = filename
 
@@ -38,3 +38,11 @@ class Decompressor():
             current_bytes = file_obj.read(8)
 
         return (filename, data, chars, bit_length)
+
+
+class BinaryDecompressor():
+    def __init__(self, filename):
+        self.filename = filename
+
+    def decompress(self):
+        pass

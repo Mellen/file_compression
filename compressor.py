@@ -1,7 +1,8 @@
 import sys
 import os
+from binarytree import Leaf, Node, printTree, LEFT, RIGHT
 
-class Compressor():
+class TextCompressor():
     def __init__(self, filename):
         self.filename = filename
         self.outputname = filename+'.tc'
@@ -47,3 +48,60 @@ class Compressor():
             values.append(int(value, 2))
 
         return values
+
+
+class BinaryCompressor():
+
+    def __init__(self, filename):
+        self.filename = filename
+        self.outputname = filename + '.bc'
+
+    def compress(self):
+        all_bytes = []
+        with open(self.filename, 'rb') as binaryfile:
+            all_bytes = binaryfile.read()
+
+        print('start length', len(all_bytes))
+
+        bytes_frequency = self.getFrequencies(all_bytes)
+        
+        tree = [Leaf(bf, bf[1]) for bf in bytes_frequency]
+        leaves = []
+        
+        while len(tree) > 1:
+            left, right = tree[:2]
+            if type(left) is Leaf:
+                leaves.append(left)
+            if type(right) is Leaf:
+                leaves.append(right)
+            tree = tree[2:]
+            node = Node(left, right, left.value + right.value)
+            tree.append(node)
+            tree = sorted(tree, key=lambda node: node.value)
+            
+        symbol_map = {leaf.data[0]:leaf.code for leaf in leaves}
+
+        output_bits = '1'
+        for b in all_bytes:
+            output_bits = output_bits + symbol_map[b]
+
+        byte_count = (len(output_bits)+7) // 8
+
+        output_int = int(output_bits, 2)
+
+        output_bytes = output_int.to_bytes(byte_count, sys.byteorder)
+
+        print(symbol_map)
+        print('end length', len(output_bytes))        
+
+    def getFrequencies(self, all_bytes):
+        byte_set = set(all_bytes)
+
+        bytes_frequency_dict = {b:0 for b in byte_set}
+
+        for b in all_bytes:
+            bytes_frequency_dict[b] = bytes_frequency_dict[b] + 1
+        
+        return sorted([item for item in bytes_frequency_dict.items()], key=lambda item:item[1])
+
+        
