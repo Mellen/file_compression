@@ -55,7 +55,7 @@ def buildTree(bytes_frequency):
         tree.append(node)
         tree = sorted(tree, key=lambda node: node.value)
 
-    return leaves, tree
+    return leaves, tree[0]
 
 
 def printTree(root):

@@ -1,4 +1,5 @@
 import sys
+from binarytree import buildTree, LEFT, RIGHT, Leaf
 
 class TextDecompressor():
     def __init__(self, filename):
@@ -43,6 +44,33 @@ class TextDecompressor():
 class BinaryDecompressor():
     def __init__(self, filename):
         self.filename = filename
+        self.outputname = '.'.join(filename.split('.')[:-1])
 
     def decompress(self):
-        pass
+        byte_frequencies = []
+        input_bytes = None
+        with open(self.filename, 'rb') as input_file:
+            leaves_count = int.from_bytes(input_file.read(2), sys.byteorder)
+            max_count_bytes = int.from_bytes(input_file.read(8), sys.byteorder)
+            while leaves_count > 0:
+                b = input_file.read(1)
+                c = int.from_bytes(input_file.read(max_count_bytes), sys.byteorder)
+                byte_frequencies.append((b,c))
+                leaves_count -= 1
+            input_bytes = input_file.read()
+        _, tree = buildTree(byte_frequencies)
+        input_bits = bin(int.from_bytes(input_bytes, sys.byteorder))[3:]
+        output_bytes = b''
+        current_node = tree
+        for bit in input_bits:
+            if bit == LEFT:
+                current_node = current_node.left
+            else:
+                current_node = current_node.right
+
+            if type(current_node) is Leaf:
+                output_bytes += current_node.data[0]
+                current_node = tree
+
+        with open(self.outputname, 'wb') as output_file:
+            output_file.write(output_bytes)

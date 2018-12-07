@@ -82,7 +82,8 @@ class BinaryCompressor():
 
         max_count_bytes = ceil(leaves[-1].data[1].bit_length()/8)
 
-        header_bytes = max_count_bytes.to_bytes(8, sys.byteorder)
+        header_bytes = len(leaves).to_bytes(2, sys.byteorder)
+        header_bytes += max_count_bytes.to_bytes(8, sys.byteorder)
 
         for leaf in leaves:
             header_bytes += (leaf.data[0].to_bytes(1, sys.byteorder))
