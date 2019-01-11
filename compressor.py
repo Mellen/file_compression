@@ -64,9 +64,9 @@ class BinaryCompressor():
 
         print('start length', len(all_bytes))
 
-        bytes_frequency = self.getFrequencies(all_bytes)
+        byte_frequencies = self.getFrequencies(all_bytes)
 
-        leaves, _ = buildTree(bytes_frequency)
+        leaves, _ = buildTree(byte_frequencies)
 
         symbol_map = {leaf.data[0]:leaf.code for leaf in leaves}
 
@@ -98,11 +98,11 @@ class BinaryCompressor():
     def getFrequencies(self, all_bytes):
         byte_set = set(all_bytes)
 
-        bytes_frequency_dict = {b:0 for b in byte_set}
+        byte_frequencies_dict = {b:0 for b in byte_set}
 
         for b in all_bytes:
-            bytes_frequency_dict[b] = bytes_frequency_dict[b] + 1
+            byte_frequencies_dict[b] = byte_frequencies_dict[b] + 1
 
-        return sorted([item for item in bytes_frequency_dict.items()], key=lambda item:item[1])
+        return sorted([item for item in byte_frequencies_dict.items()], key=lambda item:item[1])
 
         

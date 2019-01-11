@@ -1,5 +1,5 @@
 import sys
-from binarytree import buildTree, LEFT, RIGHT, Leaf
+from binarytree import buildTree, LEFT, Leaf
 
 class TextDecompressor():
     def __init__(self, filename):
@@ -47,17 +47,7 @@ class BinaryDecompressor():
         self.outputname = '.'.join(filename.split('.')[:-1])
 
     def decompress(self):
-        byte_frequencies = []
-        input_bytes = None
-        with open(self.filename, 'rb') as input_file:
-            leaves_count = int.from_bytes(input_file.read(2), sys.byteorder)
-            max_count_bytes = int.from_bytes(input_file.read(8), sys.byteorder)
-            while leaves_count > 0:
-                b = input_file.read(1)
-                c = int.from_bytes(input_file.read(max_count_bytes), sys.byteorder)
-                byte_frequencies.append((b,c))
-                leaves_count -= 1
-            input_bytes = input_file.read()
+        input_bytes, byte_frequencies = self.readFile()
         _, tree = buildTree(byte_frequencies)
         input_bits = bin(int.from_bytes(input_bytes, sys.byteorder))[3:]
         output_bytes = b''
@@ -74,3 +64,17 @@ class BinaryDecompressor():
 
         with open(self.outputname, 'wb') as output_file:
             output_file.write(output_bytes)
+
+    def readFile(self):
+        byte_frequencies = []
+        input_bytes = None
+        with open(self.filename, 'rb') as input_file:
+            leaves_count = int.from_bytes(input_file.read(2), sys.byteorder)
+            max_count_bytes = int.from_bytes(input_file.read(8), sys.byteorder)
+            while leaves_count > 0:
+                b = input_file.read(1)
+                c = int.from_bytes(input_file.read(max_count_bytes), sys.byteorder)
+                byte_frequencies.append((b,c))
+                leaves_count -= 1
+            input_bytes = input_file.read()
+        return input_bytes, byte_frequencies

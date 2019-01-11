@@ -39,8 +39,8 @@ class Node():
         self.right.update_code(update)
 
 
-def buildTree(bytes_frequency):
-    tree = [Leaf(bf, bf[1]) for bf in bytes_frequency]
+def buildTree(byte_frequencies):
+    tree = [Leaf(bf, bf[1]) for bf in byte_frequencies]
 
     leaves = []
 
@@ -57,32 +57,3 @@ def buildTree(bytes_frequency):
 
     return leaves, tree[0]
 
-
-def printTree(root):
-    layers = [[root]]
-    done = False
-    
-    while not done:
-        last_layer = layers[-1]
-        layer = []
-        for node in last_layer:
-            if type(node) is Node:
-                layer.append(node.left)
-                layer.append(node.right)
-        done = len(layer) == 0
-        if not done:
-            layers.append(layer)
-
-    for i, layer in enumerate(layers):
-        layers[i] = list(map(lambda node: ' '*len(str(node)) + str(node), layer))
-    space_count = sum(map(lambda s: len(s), layers[-1]))//2
-
-    string = ''
-    
-    for layer in layers:
-        spaces = ' '*space_count
-        space_count = space_count//2
-        string = string + spaces + spaces.join(layer)
-        string = string + '\n'
-
-    print(string)
